@@ -96,6 +96,15 @@ defmodule IPA do
     end
   end
 
+  def get_hosts(bin) do
+    {:ok, [one, two, three, four], range} = parse_cidr(bin, << >>, [])
+    Enum.map(1..range, fn x -> {one, two, three, four+x} |> to_dotted_dec end)
+  end
+
+  def parse_cidr(<< ?., rest :: binary >>, digit, acc),   do: parse_cidr(rest, << >>, [String.to_integer(digit)|acc])
+  def parse_cidr(<< ?/, rest :: binary >>, digit, acc),   do: {:ok, [String.to_integer(digit)|acc] |> Enum.reverse, String.to_integer(rest)}
+  def parse_cidr(<< char, rest :: binary >>, digit, acc), do: parse_cidr(rest, digit <> << char >>, acc)
+
   @doc """
   Converts CIDR, binary, hexadecimal, dotted binary and tuple
   notation IP address/subnet mask to dotted decimal.
